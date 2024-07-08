@@ -165,3 +165,61 @@ print(x_full.shape)
 print(y_full.shape)
 plt.imshow(x_full[0])
 print(np.argmax(y_full[0]))
+
+from tensorflow.keras import layers
+import tensorflow.keras as kr
+input = layers.Input((140,162,3))
+
+x = layers.SeparableConv2D(32,3) (input)
+x = layers.BatchNormalization()(x)
+x = layers.Activation('relu') (x)
+x = layers.MaxPooling2D() (x)
+
+x = layers.SeparableConv2D(64,3) (x)
+x = layers.BatchNormalization()(x)
+x = layers.Activation('relu') (x)
+x = layers.MaxPooling2D() (x)
+
+x = layers.SeparableConv2D(128,3) (x)
+x = layers.BatchNormalization()(x)
+x = layers.Activation('relu') (x)
+x = layers.MaxPooling2D() (x)
+
+x = layers.SeparableConv2D(256,3) (x)
+x = layers.BatchNormalization()(x)
+x = layers.Activation('relu') (x)
+x = layers.MaxPooling2D() (x)
+
+x = layers.SeparableConv2D(512,3) (x)
+x = layers.BatchNormalization()(x)
+x = layers.Activation('relu') (x)
+x = layers.MaxPooling2D() (x)
+
+x = layers.SeparableConv2D(1024,3) (x)
+x = layers.BatchNormalization()(x)
+x = layers.Activation('relu') (x)
+x = layers.MaxPooling2D() (x)
+
+output = layers.Dense(10,'relu')(x)
+
+model = kr.Model(input,output)
+model.summary()
+#split data
+#80 - 10 - 10
+# 773 - 97, 97
+x_train = x_full[:773]
+x_eval = x_full[773:773+97]
+x_test = x_full[773+97:773+97+97]
+
+y_train = y_full[:773]
+y_eval = y_full[773:773+97]
+y_test = y_full[773+97:773+97+97]
+print(x_train.shape)
+print(x_eval.shape)
+print(x_test.shape)
+
+print()
+
+print(y_train.shape)
+print(y_eval.shape)
+print(y_test.shape)
