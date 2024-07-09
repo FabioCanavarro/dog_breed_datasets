@@ -168,58 +168,76 @@ print(np.argmax(y_full[0]))
 
 from tensorflow.keras import layers
 import tensorflow.keras as kr
-input = layers.Input((140,162,3))
 
-x = layers.SeparableConv2D(32,3) (input)
+inputs = layers.Input(shape=(140, 162, 3))
+x = layers.SeparableConv2D(32, 3, padding='same', activation='relu')(inputs)
 x = layers.BatchNormalization()(x)
-x = layers.Activation('relu') (x)
-x = layers.MaxPooling2D() (x)
-
-x = layers.SeparableConv2D(64,3) (x)
+x = layers.MaxPooling2D()(x)
+x = layers.SeparableConv2D(64, 3, padding='same', activation='relu')(x)
 x = layers.BatchNormalization()(x)
-x = layers.Activation('relu') (x)
-x = layers.MaxPooling2D() (x)
-
-x = layers.SeparableConv2D(128,3) (x)
+x = layers.MaxPooling2D()(x)
+x = layers.SeparableConv2D(128, 3, padding='same', activation='relu')(x)
 x = layers.BatchNormalization()(x)
-x = layers.Activation('relu') (x)
-x = layers.MaxPooling2D() (x)
-
-x = layers.SeparableConv2D(256,3) (x)
+x = layers.MaxPooling2D()(x)
+x = layers.SeparableConv2D(256, 3, padding='same', activation='relu')(x)
 x = layers.BatchNormalization()(x)
-x = layers.Activation('relu') (x)
-x = layers.MaxPooling2D() (x)
+x = layers.GlobalAveragePooling2D()(x)
+outputs = layers.Dense(10, activation='softmax')(x)
 
-x = layers.SeparableConv2D(512,3) (x)
-x = layers.BatchNormalization()(x)
-x = layers.Activation('relu') (x)
-x = layers.MaxPooling2D() (x)
-
-x = layers.SeparableConv2D(1024,3) (x)
-x = layers.BatchNormalization()(x)
-x = layers.Activation('relu') (x)
-x = layers.MaxPooling2D() (x)
-
-output = layers.Dense(10,'relu')(x)
-
-model = kr.Model(input,output)
+model = kr.Model(inputs, outputs)
 model.summary()
+
 #split data
 #80 - 10 - 10
 # 773 - 97, 97
-x_train = x_full[:773]
-x_eval = x_full[773:773+97]
+#shuffle
+np.random.seed(0)
+np.random.shuffle(x_full)
+np.random.seed(0)
+np.random.shuffle(y_full)
+np.random.seed(0)
+
+x_train = x_full[:773+97]
 x_test = x_full[773+97:773+97+97]
 
-y_train = y_full[:773]
-y_eval = y_full[773:773+97]
+y_train = y_full[:773+97]
 y_test = y_full[773+97:773+97+97]
+
+x_train = x_train.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
+
+print(x_train.dtype, x_train.min(), x_train.max())
+
+
 print(x_train.shape)
-print(x_eval.shape)
 print(x_test.shape)
 
 print()
 
 print(y_train.shape)
-print(y_eval.shape)
 print(y_test.shape)
+
+%load_ext tensorboard
+import datetime
+log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+
+
+model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=["accuracy"])
+
+callback = [
+    kr.callbacks.EarlyStopping(monitor='loss', patience=10, verbose=1, restore_best_weights=True),
+    kr.callbacks.ModelCheckpoint("checkpointmodel.keras", verbose=1, save_best_only=True),
+    tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+]
+
+history = model.fit(
+    x_train, y_train,
+    batch_size=32,
+    epochs=100,
+    validation_split=0.1,
+    callbacks=callback
+)
+model.evaluate(x_train,y_train)
+model.save("Best_model.keras")
