@@ -217,7 +217,6 @@ print()
 print(y_train.shape)
 print(y_test.shape)
 
-%load_ext tensorboard
 import datetime
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
